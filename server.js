@@ -1,7 +1,6 @@
 require("dotenv").config({path:`.env.${process.env.NODE_ENV}`});
 const express = require("express");
-const logger = require("./configs/logger.config");
-
+global.logger = require("./configs/logger.config");
 const http = require("http");
 const app = express();
 const PORT = process.env.PORT || 8000 ;
@@ -28,8 +27,8 @@ const onError = (error) => {
 app.set("port", PORT);
 const server = http.createServer(app);
 server.on("error", onError);
-server.listen(PORT, () => {
-  logger.info(`server is listning at ${PORT}, instance_pid:${process.pid}`);
+server.listen(PORT, async () => {
+  global.logger.info(`server is listning at ${PORT}, instance_pid:${process.pid}`);
   const server_info = {env:process.env.NODE_ENV,port:PORT,pid:process.pid,msa:process.env.msa}
   console.log(server_info);
 });

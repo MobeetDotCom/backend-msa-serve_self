@@ -35,7 +35,7 @@ const server = http.createServer(app);
 server.on("error", onError);
 server.listen(PORT, async () => {
   global.logger.info(`server is listning at ${PORT}, instance_pid:${process.pid}`);
-  const server_info = {env:process.env.NODE_ENV,port:PORT,pid:process.pid,msa:process.env.msa}
+  const server_info = {env:process.env.NODE_ENV,port:PORT,pid:process.pid,msa:process.env.MSA}
   console.log(server_info);
 });
 

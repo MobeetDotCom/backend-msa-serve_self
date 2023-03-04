@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "export NODE_ENV=development&& nodemon server.js"
+    "start": "export NODE_ENV=local&& nodemon server.js",
+    "dev": "export NODE_ENV=local&& nodemon server.js",
+    "migration-generate": "export NODE_ENV=local&&typeorm migration:generate -d  ./database/migrations/migraiton.config.js -o ./database/migrations/migration -t true"
   },
   "repository": {
     "type": "git",
@@ -20,8 +22,10 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mongodb": "^3.7.3",
-    "typeorm": "^0.3.11",
+    "pg": "^8.9.0",
+    "sequelize": "^6.28.0",
+    "sequelize-cli": "^6.6.0",
+    "typeorm": "^0.3.12",
     "winston": "^3.8.2"
   }
 }

@@ -1,13 +1,14 @@
-require("dotenv").config({path:`.env.${process.env.NODE_ENV}`});
+require("dotenv").config();
 const express = require("express");
 global.logger = require("./configs/logger.config");
 const http = require("http");
-const { ENV_PROD, ENV_LOCAL, ENV_STAGING } = require("./constant");
-const DB_CONFIG = require("./configs/database.config.json");
+const ENV_JSON = require("./configs/env.config");
+const { CONSTANT } = require("./constant");
 const app = express();
-const PORT = process.env.PORT || 8000 ;
+
+const PORT = ENV_JSON().SERVER.PORT || 8000 ;
 // Disable console.log in prod
-if(process.env.NODE_ENV===ENV_PROD){
+if(process.env.NODE_ENV===CONSTANT.ENV.PROD){
   console.log = ()=>{};
 }
 
@@ -35,7 +36,7 @@ const server = http.createServer(app);
 server.on("error", onError);
 server.listen(PORT, async () => {
   global.logger.info(`server is listning at ${PORT}, instance_pid:${process.pid}`);
-  const server_info = {env:process.env.NODE_ENV,port:PORT,pid:process.pid,msa:process.env.MSA}
+  const server_info = {env:process.env.NODE_ENV,port:ENV_JSON().SERVER.PORT,pid:process.pid,msa:ENV_JSON().SERVER.MSA}
   console.log(server_info);
 });
 

@@ -1,6 +1,9 @@
-exports.ENV_PROD = "production";
-exports.ENV_STAGING = "staging";
-exports.ENV_LOCAL = "local";
+const CONSTANT = {
+    ENV: {
+        PROD: "production",
+        STAGING: "staging",
+        LOCAL: "local"
+    }
+}
 
-exports.RELATION_POST = "post";
-
+module.exports = {CONSTANT}

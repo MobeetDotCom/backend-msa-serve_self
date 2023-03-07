@@ -7,3 +7,4 @@ logs/
 #npm cache
 .npm
 .vscode/settings.json
+temp/

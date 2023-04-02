@@ -29,6 +29,12 @@ const formConfig = {
                         "data_type": DTYPES.VAL_STRING_256
                     },
                     {
+                        "reference_id": "username",
+                        "field_name": "Username",
+                        "cardinality": "ONE",
+                        "data_type": DTYPES.VAL_STRING_256
+                    },
+                    {
                         "reference_id": "email_address",
                         "field_name": "Email address",
                         "cardinality": "ONE",

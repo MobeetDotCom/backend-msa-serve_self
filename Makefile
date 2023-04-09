@@ -10,3 +10,5 @@ args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
 .DEFAULT_GOAL: guide
 push-env:
 	@sh exportEnvJSON.sh
+clean-install:
+	@rm -r -f node_modules && rm -f package-lock.json && npm cache clean --force && npm install

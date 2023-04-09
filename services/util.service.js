@@ -1,58 +1,41 @@
-const formConfig = require("../utils/form.conf");
+const formSchema = require("../utils/form.schema");
 const { formatErrorLog } = require("../utils/error.utils");
 const { dbConnection } = require("@mobeetdotcom/orm");
 const { In } = require("typeorm");
+const { CONSTANT } = require("../constant");
 const getReference = async (options = {}) => {
     try {
         let { ref_type, reference_list, form_meta } = options;
-        let response = [];
-        if (formConfig[form_meta]) {
-            reference_list = formConfig[form_meta].ref.ref_set;
-            ref_type = formConfig[form_meta].reference_category;
-            for (let i = 0; i < formConfig[form_meta].non_ref.length; i++) {
-                response = [...response, ...formConfig[form_meta].non_ref[i].cols];
+        let referencesToBePicked = [];
+        if (!formSchema[form_meta]) return -1;
+        const schema = formSchema[form_meta];
+        for (const [key, value] of Object.entries(schema)) {
+            let formObject = { group: key };
+            if (!value.references) {
+                formObject["fields"] = value.non_references;
+                referencesToBePicked.push(formObject);
+                continue;
             }
+            let { reference_table, reference_table_primary_key, references, reference_projection } = value;
+            let aggregator = "json_agg(json_build_object('option_id', ref_option.option_id,'option_text', ref_option.option_text)) options";
+            let selectedColumns = [...reference_projection, aggregator];
+            let whereCondition = `${reference_table}.${reference_table_primary_key} IN (:...references)`;
+            let whereParams = { references };
+            let innerJoinCondition = `${reference_table}.${reference_table_primary_key}=ref_option.reference_id`;
+            let queryBuilder = dbConnection.serverMain.repos[reference_table].createQueryBuilder();
+            let referenceData = await queryBuilder
+                .leftJoinAndMapOne(`reference_id`, "ref_option", "ref_option", innerJoinCondition)
+                .where(whereCondition, whereParams)
+                .groupBy('ref_reference.reference_id')
+                .select(selectedColumns)
+                .execute();
+            formObject["fields"] = referenceData;
+            referencesToBePicked.push(formObject);
         }
-
-        let queryCondition = { reference_category_id: ref_type };
-        if (reference_list && reference_list.length > 0) {
-            reference_list = Array.isArray(reference_list) ? reference_list : [reference_list];
-            queryCondition.reference_id = In(reference_list);
-        }
-        
-        const repoReference = dbConnection.serverMain.repos["ref_reference"];
-        const refData = await repoReference.find({
-            where: queryCondition,
-            select: { reference_id: true, field_name: true, data_type: true, cardinality: true }
-        });
-
-        let refIds = refData.map(ref => ref.reference_id);
-
-        const repoOption = dbConnection.serverMain.repos["ref_option"];
-        const optionData = await repoOption.find({
-            where: [{ reference_id: In(refIds) }],
-            select: { option_id: true, reference_id: true, option_text: true }
-        });
-
-        let optionArrayOfObj = {};
-        for (const op of optionData) {
-            if (!optionArrayOfObj.hasOwnProperty(op.reference_id)) {
-                optionArrayOfObj[op.reference_id] = [];
-            }
-            optionArrayOfObj[op.reference_id].push(op);
-            delete op.reference_id;
-        }
-
-        for (let refIndex = 0; refIndex < refData.length; refIndex++) {
-            if (optionArrayOfObj.hasOwnProperty(refData[refIndex].reference_id)) {
-                refData[refIndex].options = optionArrayOfObj[refData[refIndex].reference_id];
-            }
-        }
-        response = [...response, ...refData];
-        return response;
+        return referencesToBePicked;
     } catch (error) {
         console.error(error);
-        global.logger.error(formatErrorLog(error))
+        global.logger.error(formatErrorLog(error));
     }
-}
+};
 module.exports = { getReference };

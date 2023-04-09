@@ -1,6 +1,6 @@
 const { formatErrorLog } = require("../utils/error.utils");
 const { getReference } = require("./util.service");
-const formConfig = require("../utils/form.conf");
+const formConfig = require("../utils/form.schema");
 const { READ_COMMITED } = require("../constant").CONSTANT.ISOLATION_LEVELS
 const { dbConnection } = require("@mobeetdotcom/orm");
 const { upsertClassifications } = require("../utils/helper.utils");
